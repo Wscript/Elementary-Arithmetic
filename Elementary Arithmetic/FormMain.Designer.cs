@@ -172,7 +172,7 @@
             this.textBoxMinutes.Font = new System.Drawing.Font("宋体", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBoxMinutes.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.textBoxMinutes.Location = new System.Drawing.Point(8, 30);
-            this.textBoxMinutes.MaxLength = 2;
+            this.textBoxMinutes.MaxLength = 3;
             this.textBoxMinutes.Name = "textBoxMinutes";
             this.textBoxMinutes.Size = new System.Drawing.Size(86, 62);
             this.textBoxMinutes.TabIndex = 0;

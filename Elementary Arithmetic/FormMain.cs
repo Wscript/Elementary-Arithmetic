@@ -18,6 +18,15 @@ namespace Elementary_Arithmetic
         static Random randomizer = new Random ();
         static int intAnswer;
 
+        protected override bool ProcessCmdKey (ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Back)
+            {
+                labelScore.Text = textBoxMinutes.Text;
+            }
+            return base.ProcessCmdKey (ref msg, keyData);
+        }
+
         public FormMain ()
         {
             InitializeComponent ();
@@ -150,12 +159,25 @@ namespace Elementary_Arithmetic
             int intMinutes = 0;
             string strRemainMinutes = "";
             string strRemainSeconds = "";
+
+            int intRemainMinutes;
+            int intRemainSeconds;
+
             bool isNumber = int.TryParse (textBoxMinutes.Text, out intMinutes);
 
             timerTickCounter = timerTickCounter + 1;
 
-            int intRemainMinutes = (intMinutes * 60 - timerTickCounter) / 60;
-            int intRemainSeconds = (intMinutes * 60 - timerTickCounter) % 60;
+            if (radioButton1.Checked)
+            {
+                intRemainMinutes = (intMinutes * 60 - timerTickCounter) / 60;
+                intRemainSeconds = (intMinutes * 60 - timerTickCounter) % 60;
+            }
+            else
+            {
+                intRemainMinutes = timerTickCounter / 60;
+                intRemainSeconds = timerTickCounter % 60;
+            }
+
             if (intRemainMinutes < 10)
             {
                 strRemainMinutes = "0" + intRemainMinutes.ToString ();
@@ -175,20 +197,70 @@ namespace Elementary_Arithmetic
 
             labelTime.Text = strRemainMinutes + ":" + strRemainSeconds;
 
-            if (timerTickCounter / 60 == intMinutes)
+            if (radioButton1.Checked)
             {
-                timer.Stop ();
-                timerTickCounter = 0;           //停止计时器，并将激活次数清零
-                textBoxMinutes.Enabled = true;
-                textBoxResult.Enabled = false;
-                buttonStart.Enabled = true;
-                textBoxMinutes.Focus ();
-                Log (textBoxMinutes.Text + "分钟四则运算测试完成，共计" + labelScore.Text + "题.",
-                    "d:\\log\\",
-                    "四则运算测试" + DateTime.Now.Year.ToString () + "-" + DateTime.Now.Month.ToString () + "-" + DateTime.Now.Day.ToString () + ".log");
+                if (timerTickCounter / 60 == intMinutes)
+                {
+                    timer_stop ();
+                }
+            }
+            else
+            {
+                if (labelScore.Text == "0")
+                {
+                    timer_stop ();
+                }
+            }
+        }
+
+        private void timer_stop ()
+        {
+            string strArithmetics = "";
+            timer.Stop ();
+            timerTickCounter = 0;           //停止计时器，并将激活次数清零
+
+            textBoxMinutes.Enabled = true;
+            textBoxResult.Enabled = false;
+            buttonStart.Enabled = true;
+            checkBox1.Enabled = true;
+            checkBox2.Enabled = true;
+            checkBox3.Enabled = true;
+            checkBox4.Enabled = true;
+            radioButton1.Enabled = true;
+            radioButton2.Enabled = true;
+            textBoxMinutes.Focus ();
+
+            if (checkBox1.Checked)
+            {
+                strArithmetics = strArithmetics + "加";
+            }
+            if (checkBox2.Checked)
+            {
+                strArithmetics = strArithmetics + "减";
+            }
+            if (checkBox3.Checked)
+            {
+                strArithmetics = strArithmetics + "乘";
+            }
+            if (checkBox4.Checked)
+            {
+                strArithmetics = strArithmetics + "除";
+            }
+            if (radioButton1.Checked)
+            {
+                Log ("四则运算测试,计时模式(" + strArithmetics + ")完成，用时" + textBoxMinutes.Text + ":00,共计" + labelScore.Text + "题.",
+                     "d:\\log\\",
+                     "四则运算测试" + DateTime.Now.Year.ToString () + "-" + DateTime.Now.Month.ToString () + "-" + DateTime.Now.Day.ToString () + ".log");
+            }
+            else
+            {
+                Log ("四则运算测试,闯关模式(" + strArithmetics + ")完成，用时" + labelTime.Text + ",共计" + textBoxMinutes.Text + "题.",
+                     "d:\\log\\",
+                     "四则运算测试" + DateTime.Now.Year.ToString () + "-" + DateTime.Now.Month.ToString () + "-" + DateTime.Now.Day.ToString () + ".log");
             }
 
         }
+
         private void buttonStart_Click (object sender, EventArgs e)
         {
             checkBox1.Enabled = false;
@@ -202,37 +274,61 @@ namespace Elementary_Arithmetic
             textBoxResult.Text = "";
             textBoxResult.Focus ();
 
-            if (radioButton1.Checked == true)
+            if (radioButton1.Checked)
             {
                 int intMinutes = 0;
                 if (int.TryParse (textBoxMinutes.Text, out intMinutes))
                 {
-                    labelTime.Text = intMinutes.ToString () + ":00";
                     timer.Interval = 1000;
                     timer.Start ();
-                    labelScore.Text = "0";
                     buttonStart.Enabled = false;
                     intAnswer = NewQuiz ();
                 }
             }
             else
             {
+                int intTestNumber;
+                if (int.TryParse (textBoxMinutes.Text, out intTestNumber))
+                {
+                    timer.Interval = 1000;
+                    timer.Start ();
+                    labelScore.Text = intTestNumber.ToString ();
+                    buttonStart.Enabled = false;
+                    intAnswer = NewQuiz ();
 
+                }
             }
         }
 
         private void textBoxResult_TextChanged (object sender, EventArgs e)
         {
             int intResult, intScore;
-            if (int.TryParse (textBoxResult.Text, out intResult))
+            if (radioButton1.Checked)
             {
-                if (intAnswer == intResult)
+                if (int.TryParse (textBoxResult.Text, out intResult))
                 {
-                    intScore = System.Convert.ToInt32 (labelScore.Text);
-                    intScore = intScore + 1;
-                    labelScore.Text = intScore.ToString ();
-                    textBoxResult.Text = "";
-                    intAnswer = NewQuiz ();
+                    if (intAnswer == intResult)
+                    {
+                        intScore = System.Convert.ToInt32 (labelScore.Text);
+                        intScore = intScore + 1;
+                        labelScore.Text = intScore.ToString ();
+                        textBoxResult.Text = "";
+                        intAnswer = NewQuiz ();
+                    }
+                }
+            }
+            else
+            {
+                if (int.TryParse (textBoxResult.Text, out intResult))
+                {
+                    if (intAnswer == intResult)
+                    {
+                        intScore = System.Convert.ToInt32 (labelScore.Text);
+                        intScore = intScore - 1;
+                        labelScore.Text = intScore.ToString ();
+                        textBoxResult.Text = "";
+                        intAnswer = NewQuiz ();
+                    }
                 }
             }
         }
@@ -261,12 +357,14 @@ namespace Elementary_Arithmetic
                 {
                     labelTime.Text = intMinutes.ToString () + ":00";
                     labelMinutes.Text = "分钟";
+                    labelScore.Text = "0";
                 }
             }
             else
             {
                 labelTime.Text = "00:00";
                 labelMinutes.Text = "题";
+                labelScore.Text = textBoxMinutes.Text;
             }
         }
     }
